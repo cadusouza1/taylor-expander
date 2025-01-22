@@ -47,9 +47,10 @@ def main() -> None:
 
     taylor_func = function.subs(x, a)
 
+    diff = taylor_func
     for i in range(0, args.derivatives):
-        diff = sympy.diff(taylor_func, a, i) / sympy.factorial(i)
-        taylor += diff * (x - a) ** i
+        taylor += diff * (x - a) ** i / sympy.factorial(i)
+        diff = diff.diff(a)
 
     taylor = sympy.simplify(taylor)
 
@@ -59,8 +60,6 @@ def main() -> None:
         taylor = taylor.subs(x, sympy.sympify(args.x))
 
     print(taylor)
-
-    # print(sympy.diff("e^x", "x", 2))
 
 if __name__ == "__main__":
     main()
