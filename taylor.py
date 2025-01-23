@@ -1,8 +1,18 @@
 import argparse
-import sys
+from itertools import count
+from typing import Any, Generator
 
 import sympy
-from sympy import Number
+from sympy import Expr, Number, Symbol
+
+
+def taylor_generator(f, x: Symbol, a: Symbol) -> Generator[Any, Expr, Any]:
+    taylor_func = f.subs(x, a)
+
+    for i in count(0):
+        yield taylor_func * (x - a) ** i / sympy.factorial(i)
+        taylor_func = taylor_func.diff(a)
+
 
 def main() -> None:
     parser = argparse.ArgumentParser()
@@ -42,15 +52,14 @@ def main() -> None:
 
     function = sympy.sympify(args.function)
 
-    taylor = 0
     x, a = sympy.symbols("x a")
 
-    taylor_func = function.subs(x, a)
+    taylor = 0
+    for i, taylor_term in enumerate(taylor_generator(function, x, a)):
+        if i > args.derivatives - 1:
+            break
 
-    diff = taylor_func
-    for i in range(0, args.derivatives):
-        taylor += diff * (x - a) ** i / sympy.factorial(i)
-        diff = diff.diff(a)
+        taylor += taylor_term
 
     taylor = sympy.simplify(taylor)
 
@@ -60,6 +69,7 @@ def main() -> None:
         taylor = taylor.subs(x, sympy.sympify(args.x))
 
     print(taylor)
+
 
 if __name__ == "__main__":
     main()
